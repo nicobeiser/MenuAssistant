@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gemini Chat • Chat</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">G</div>
+        <div>
+          <div class="brand-title">Gemini Chat</div>
+          <div class="brand-subtitle">Chat</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="btn ghost" href="index.html">← Home</a>
+        <button id="btnClear" class="btn danger ghost" title="Borrar conversación">Borrar</button>
+      </nav>
+    </header>
+
+    <main class="page">
+      <section class="card chat">
+        <div class="chat-header">
+          <div>
+            <div class="chat-title">Hablá con la IA</div>
+            <div class="muted small">Consejo: probá “¿Qué ves en esta imagen?” o “Armame un resumen”.</div>
+          </div>
+          <div class="status">
+            <span class="dot" id="dot"></span>
+            <span class="small muted" id="statusText">Listo</span>
+          </div>
+        </div>
+
+        <div id="messages" class="messages" aria-live="polite"></div>
+
+        <form id="form" class="composer" autocomplete="off">
+          <input
+            id="input"
+            class="input"
+            type="text"
+            placeholder="Escribí tu mensaje..."
+            maxlength="4000"
+          />
+          <button id="btnSend" class="btn primary" type="submit">Enviar</button>
+        </form>
+
+        <div class="hint muted small">
+          Endpoint: <code>POST http://localhost:8000/chat</code> → <code>{"reply":"..."}</code>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="chat.js"></script>
+</body>
+</html>
