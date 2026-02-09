@@ -1,4 +1,5 @@
-const API_URL = "http://127.0.0.1:8000/chat";
+const BASE_URL = "http://127.0.0.1:8000";
+const API_URL = `${BASE_URL}/chat`;
 
 
 
@@ -168,5 +169,5 @@ if (formEl) {
 
 // --- Init ---
 loadHistory();
-addBubble("ai", "Hello. Send me a message and I'll forward it to the backend.");
+addBubble("ai", "Hello! Not sure what to eat? Ask me for a recommendation.");
 setStatus("ready", "Ready");

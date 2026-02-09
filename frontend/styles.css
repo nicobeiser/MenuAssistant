@@ -339,3 +339,78 @@ code{
   .messages{ height: 62vh; }
   .chat-title{ font-size: 20px; }
 }
+
+/* Upload zone */
+.upload-zone{
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+  z-index: 1;
+}
+
+.upload-header{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.upload-title{
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--muted);
+  letter-spacing: .3px;
+}
+
+.btn-sm{
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.image-list{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.no-images{
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.image-chip{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(246,240,227,.85);
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.image-name{
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chip-del{
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--wine);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.chip-del:hover{
+  color: #ff4d6d;
+}
