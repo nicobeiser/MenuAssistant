@@ -64,6 +64,15 @@ def list_images():
     return {"images": files}
 
 
+@app.get("/images/{filename}/file")
+def get_image_file(filename: str):
+    """Serve an uploaded image file (for previews)."""
+    path = IMAGES_DIR / filename
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Image not found")
+    return FileResponse(path)
+
+
 @app.delete("/images/{filename}")
 def delete_image(filename: str):
     """Delete a specific uploaded image."""
