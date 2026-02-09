@@ -2,16 +2,21 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 from load_image import load_image
+from pathlib import Path
 import requests
 import os
+
+
+
+
+
+
+
 
 load_dotenv()
 
 API_KEY = os.getenv("API_KEY")
 
-from pathlib import Path
-
-image_path = Path(__file__).parent / "Menu.jpeg"
 
 images = [
     load_image("Menu.png"),
@@ -19,17 +24,9 @@ images = [
 ]
 
 
-with open(image_path, "rb") as f:
-    image_bytes = f.read()
 
-image = types.Part.from_bytes(
-    data=image_bytes,
-    mime_type="image/jpeg"
-)
 
 client = genai.Client(api_key=API_KEY)
-
-
 
 
 
