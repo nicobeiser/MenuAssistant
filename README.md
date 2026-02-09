@@ -121,6 +121,70 @@ If the question cannot be answered using only the menu image,
 the API will explicitly state that it cannot answer.
 
 
+
+----------------------------------------------------------------------------------------
+
+## Gemini Prompt Logic
+
+The core AI logic is implemented in the `recieve_prompt(prompt)` function.
+
+### System Prompt Design
+
+The system prompt strictly enforces the following rules:
+
+- Analyze **only** the provided menu images
+- Do **not** use external knowledge or assumptions
+- Return **exactly 3 dishes**
+- Each dish must include:
+  - name
+  - price
+  - a short reason (**≤ 50 characters**)
+- If the request:
+  - cannot be answered using the menu image
+  - or is unrelated to menu data or recommendations  
+  the model must explicitly state that it cannot answer
+
+The user message is appended to the system prompt to guide the recommendation request.
+
+---
+
+### Multimodal Input
+
+The Gemini model receives:
+
+- 📷 The menu images
+- 📝 The composed text prompt (system instructions + user input)
+
+This ensures that **all recommendations are image-driven**.
+
+---
+
+### Gemini Configuration
+
+- **Model:** `gemini-3-flash-preview`
+- **Input type:** Multimodal (image + text)
+- **Enabled tool:**
+  - `code_execution`  
+    (enabled for compatibility and future extensibility, not required for reasoning)
+
+---
+
+### Output Processing
+
+- The response text is extracted from Gemini’s structured output
+- All text parts are concatenated into a single readable string
+- The final response is returned directly by the API
+
+---
+
+### Design Goals
+
+- Prevent hallucinations
+- Enforce strict output format
+- Ensure reproducible and explainable results
+- Keep responses concise and menu-faithful
+
+
 ----------------------------------------------------------------------------------------
 
 
