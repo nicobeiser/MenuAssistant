@@ -60,10 +60,16 @@ The API will only use the information present in this image.
 
 ```text
 testgemini/
-├── main.py        # FastAPI application
-├── first.py       # Gemini logic (receive_prompt)
-├── Menu.jpeg      # Menu image
-├── .env           # Environment variables (not committed)
+├── main.py              # FastAPI application (API endpoints)
+├── first.py             # Gemini logic (receive_prompt)
+├── Menu.jpeg            # Menu image
+├── .env                 # Environment variables (not committed)
+├── frontend/            # Simple web UI
+│   ├── chat.html
+│   ├── chat.js
+│   ├── styles.css
+│   ├── favicon.ico
+│   └── favicon.png
 └── README.md
 ```
 
@@ -109,6 +115,7 @@ the API will explicitly state that it cannot answer.
 The model is constrained to use only menu content.
 If prices or dishes are not visible in the image, no assumptions are made.
 Designed for experimentation and educational purposes.
+
 
 
 
