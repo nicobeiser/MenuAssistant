@@ -1,8 +1,8 @@
 from google import genai
 from google.genai import types
-import requests
-
 from dotenv import load_dotenv
+from load_image import load_image
+import requests
 import os
 
 load_dotenv()
@@ -13,6 +13,12 @@ from pathlib import Path
 
 image_path = Path(__file__).parent / "Menu.jpeg"
 
+images = [
+    load_image("Menu.png"),
+    load_image("Menu.jpeg"),
+]
+
+
 with open(image_path, "rb") as f:
     image_bytes = f.read()
 
@@ -20,6 +26,7 @@ image = types.Part.from_bytes(
     data=image_bytes,
     mime_type="image/jpeg"
 )
+
 client = genai.Client(api_key=API_KEY)
 
 
@@ -29,12 +36,12 @@ client = genai.Client(api_key=API_KEY)
 def recieve_prompt(prompt):
     system_prompt = (
      "Analyze the menu and answer the following question."
-"Do not use any information that is not present in the menu."
-" Provide 3 dishes in a simple way, each with its price and a short reason for the choice"
-" the reason must be no longer than 50 characters)."
-" If you cannot answer because there is not enough information,"
-" or the message is not a request for menu data or a recommendation,"
-" simply state that you cannot answer."
+    "Do not use any information that is not present in the menu."
+    " Provide 3 dishes in a simple way, each with its price and a short reason for the choice"
+    " the reason must be no longer than 50 characters)."
+    " If you cannot answer because there is not enough information,"
+    " or the message is not a request for menu data or a recommendation,"
+    " simply state that you cannot answer."
 
     )
 
@@ -45,7 +52,7 @@ def recieve_prompt(prompt):
     response = client.models.generate_content(
         model="gemini-3-flash-preview",
         contents=[
-            image,
+            *images,
             full_prompt
         ],
         config=types.GenerateContentConfig(
