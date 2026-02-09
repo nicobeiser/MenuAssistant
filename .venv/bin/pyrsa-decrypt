@@ -1,4 +1,4 @@
-#!/Users/nicolasbeiserman/Desktop/Trabajos_facultad/GeminiAI/testgemini/.venv/bin/python3
+#!/home/juan/Desktop/MenuAssistant/MenuAssistant/.venv/bin/python3
 import sys
 from rsa.cli import decrypt
 if __name__ == '__main__':

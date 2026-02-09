@@ -1,4 +1,5 @@
-const API_URL = "http://127.0.0.1:8000/chat";
+const BASE_URL = "http://127.0.0.1:8000";
+const API_URL = `${BASE_URL}/chat`;
 
 
 
@@ -166,7 +167,72 @@ if (formEl) {
   });
 }
 
+// --- Image Upload ---
+const fileInput = $("fileInput");
+const imageListEl = $("imageList");
+const uploadZone = $("uploadZone");
+
+async function refreshImages() {
+  try {
+    const res = await fetch(`${BASE_URL}/images`);
+    const data = await res.json();
+    if (!imageListEl) return;
+    if (data.images.length === 0) {
+      imageListEl.innerHTML = '<span class="no-images">No images uploaded yet.</span>';
+      return;
+    }
+    imageListEl.innerHTML = data.images
+      .map(
+        (name) =>
+          `<div class="image-chip">
+            <span class="image-name">${escapeHtml(name)}</span>
+            <button class="chip-del" data-name="${escapeHtml(name)}" title="Delete">&times;</button>
+          </div>`
+      )
+      .join("");
+
+    imageListEl.querySelectorAll(".chip-del").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const name = btn.dataset.name;
+        await fetch(`${BASE_URL}/images/${encodeURIComponent(name)}`, { method: "DELETE" });
+        refreshImages();
+      });
+    });
+  } catch (err) {
+    console.error("Failed to load images", err);
+  }
+}
+
+if (fileInput) {
+  fileInput.addEventListener("change", async () => {
+    const files = fileInput.files;
+    if (!files || files.length === 0) return;
+
+    const form = new FormData();
+    for (const f of files) form.append("files", f);
+
+    setStatus("loading", "Uploading...");
+    try {
+      const res = await fetch(`${BASE_URL}/upload`, { method: "POST", body: form });
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(txt);
+      }
+      const data = await res.json();
+      addBubble("ai", `Uploaded ${data.uploaded.length} image(s): ${data.uploaded.join(", ")}`);
+      setStatus("ready", "Ready");
+      refreshImages();
+    } catch (err) {
+      addBubble("ai", "Error uploading images.");
+      setStatus("error", "Upload error");
+      console.error(err);
+    }
+    fileInput.value = "";
+  });
+}
+
 // --- Init ---
 loadHistory();
-addBubble("ai", "Hello. Send me a message and I'll forward it to the backend.");
+addBubble("ai", "Hello! Upload your menu images and ask me for recommendations.");
 setStatus("ready", "Ready");
+refreshImages();

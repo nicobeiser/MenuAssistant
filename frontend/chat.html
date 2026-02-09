@@ -49,6 +49,16 @@
           </div>
         </div>
 
+        <!-- Image upload zone -->
+        <div class="upload-zone" id="uploadZone">
+          <div class="upload-header">
+            <span class="upload-title">Menu Images</span>
+            <label class="btn btn-primary btn-sm" for="fileInput">+ Upload</label>
+            <input id="fileInput" type="file" accept=".png,.jpg,.jpeg,.webp,.gif" multiple hidden />
+          </div>
+          <div id="imageList" class="image-list"></div>
+        </div>
+
         <div id="messages" class="messages" aria-live="polite"></div>
 
         <form id="form" class="composer" autocomplete="off">

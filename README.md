@@ -38,7 +38,7 @@ source .venv/bin/activate   # macOS / Linux
 ### 3) Install dependencies
 ```bash
 pip install -U pip
-pip install fastapi uvicorn python-dotenv google-genai requests
+pip install fastapi uvicorn python-dotenv google-genai requests python-multipart
 ```
 
 ### 4) Environment variables
@@ -47,10 +47,10 @@ API_KEY=YOUR_GEMINI_API_KEY
 ⚠️ Do NOT commit this file.
 
 
-### 5) Menu image
-Place the menu image in the project root and name it:
-Menu.jpeg
-The API will only use the information present in this image.
+### 5) Menu images
+Menu images are uploaded at runtime via the web UI or the `POST /upload` endpoint.
+They are stored in the `images/` folder. You can also place images there manually.
+Supported formats: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`.
 
 
 ----------------------------------------------------------------------------------------
@@ -62,14 +62,14 @@ The API will only use the information present in this image.
 testgemini/
 ├── main.py              # FastAPI application (API endpoints)
 ├── first.py             # Gemini logic (receive_prompt)
-├── Menu.jpeg            # Menu image
+├── load_image.py        # Image loading utilities
+├── pdf_to_png.py        # PDF to PNG converter
+├── images/              # Uploaded menu images (user-managed)
 ├── .env                 # Environment variables (not committed)
 ├── frontend/            # Simple web UI
 │   ├── chat.html
 │   ├── chat.js
-│   ├── styles.css
-│   ├── favicon.ico
-│   └── favicon.png
+│   └── styles.css
 └── README.md
 ```
 
@@ -97,27 +97,44 @@ Swagger UI: http://127.0.0.1:8000/docs
 
 ### API Usage
 
+#### Upload menu images
 ```bash
-POST /chat
-Send a question related to the menu.
-Request body:
-{
-  "message": "What are 3 recommended dishes?"
-}
-Example using curl:
+curl -X POST http://127.0.0.1:8000/upload \
+  -F "files=@Menu.png" \
+  -F "files=@Menu.jpeg"
+```
+
+#### List uploaded images
+```bash
+curl http://127.0.0.1:8000/images
+```
+
+#### Delete a specific image
+```bash
+curl -X DELETE http://127.0.0.1:8000/images/Menu.png
+```
+
+#### Delete all images
+```bash
+curl -X DELETE http://127.0.0.1:8000/images
+```
+
+#### Chat (ask about the menu)
+```bash
 curl -X POST http://127.0.0.1:8000/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"What are 3 recommended dishes?"}'
 ```
 
-
 Response:
+```json
 {
   "reply": "1) Dish - price - reason\n2) ...\n3) ..."
 }
+```
 
-
-If the question cannot be answered using only the menu image,
+If no images have been uploaded, the API will ask you to upload at least one.
+If the question cannot be answered using only the menu content,
 the API will explicitly state that it cannot answer.
 
 

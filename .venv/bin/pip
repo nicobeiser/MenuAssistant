@@ -1,4 +1,4 @@
-#!/Users/nicolasbeiserman/Desktop/Trabajos_facultad/GeminiAI/testgemini/.venv/bin/python3
+#!/home/juan/Desktop/MenuAssistant/MenuAssistant/.venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
