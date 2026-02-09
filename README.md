@@ -108,11 +108,14 @@ Example using curl:
 curl -X POST http://127.0.0.1:8000/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"What are 3 recommended dishes?"}'
+```
+
+
 Response:
 {
   "reply": "1) Dish - price - reason\n2) ...\n3) ..."
 }
-```
+
 
 If the question cannot be answered using only the menu image,
 the API will explicitly state that it cannot answer.
@@ -125,6 +128,7 @@ the API will explicitly state that it cannot answer.
 The model is constrained to use only menu content.
 If prices or dishes are not visible in the image, no assumptions are made.
 Designed for experimentation and educational purposes.
+
 
 
 
