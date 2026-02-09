@@ -47,7 +47,7 @@ API_KEY=YOUR_GEMINI_API_KEY
 ⚠️ Do NOT commit this file.
 
 
-###5) Menu image
+### 5) Menu image
 Place the menu image in the project root and name it:
 Menu.jpeg
 The API will only use the information present in this image.
@@ -105,5 +105,6 @@ the API will explicitly state that it cannot answer.
 The model is constrained to use only menu content.
 If prices or dishes are not visible in the image, no assumptions are made.
 Designed for experimentation and educational purposes.
+
 
 
