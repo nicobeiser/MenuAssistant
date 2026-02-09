@@ -79,10 +79,16 @@ testgemini/
 
 
 ### Running the API
+
 Start the development server:
+
+```bash
 uvicorn main:app --reload
+```
 The API will be available at:
-http://127.0.0.1:8000
+
+## http://127.0.0.1:8000
+
 Swagger UI: http://127.0.0.1:8000/docs
 
 
@@ -90,6 +96,8 @@ Swagger UI: http://127.0.0.1:8000/docs
 
 
 ### API Usage
+
+```bash
 POST /chat
 Send a question related to the menu.
 Request body:
@@ -104,6 +112,8 @@ Response:
 {
   "reply": "1) Dish - price - reason\n2) ...\n3) ..."
 }
+```
+
 If the question cannot be answered using only the menu image,
 the API will explicitly state that it cannot answer.
 
@@ -115,6 +125,7 @@ the API will explicitly state that it cannot answer.
 The model is constrained to use only menu content.
 If prices or dishes are not visible in the image, no assumptions are made.
 Designed for experimentation and educational purposes.
+
 
 
 
