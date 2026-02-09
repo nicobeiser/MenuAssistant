@@ -11,7 +11,7 @@ API_KEY = os.getenv("API_KEY")
 
 from pathlib import Path
 
-image_path = Path(__file__).parent / "carta-restaurante.jpg"
+image_path = Path(__file__).parent / "Menu.jpeg"
 
 with open(image_path, "rb") as f:
     image_bytes = f.read()
@@ -28,12 +28,14 @@ client = genai.Client(api_key=API_KEY)
 
 def recieve_prompt(prompt):
     system_prompt = (
-        "Analizando la carta, responde la siguiente pregunta. "
-        "No uses nada diferente que no este en la carta, "
-        "responde 3 comidas de manera sencilla junto a su precio y razon de eleccion "
-        "(no debe ser de mas de 50 caracteres). "
-        "Si no podes responder la pregunta porque no tenes suficiente información "
-        "simplemente informalo. "
+     "Analyze the menu and answer the following question."
+"Do not use any information that is not present in the menu."
+" Provide 3 dishes in a simple way, each with its price and a short reason for the choice"
+" the reason must be no longer than 50 characters)."
+" If you cannot answer because there is not enough information,"
+" or the message is not a request for menu data or a recommendation,"
+" simply state that you cannot answer."
+
     )
 
     full_prompt = system_prompt + prompt

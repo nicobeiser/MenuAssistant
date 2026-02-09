@@ -1,15 +1,21 @@
 const API_URL = "http://127.0.0.1:8000/chat";
 
+
+
+
 const $ = (id) => document.getElementById(id);
 
 const messagesEl = $("messages");
 const formEl = $("form");
 const inputEl = $("input");
-const btnClear = $("btnClear");
+
 const dot = $("dot");
 const statusText = $("statusText");
 
+// --- Estado UI ---
 function setStatus(state, text) {
+  if (!dot || !statusText) return;
+
   // state: "ready" | "loading" | "error"
   if (state === "ready") {
     dot.style.background = "#3ddc97";
@@ -24,8 +30,9 @@ function setStatus(state, text) {
   statusText.textContent = text;
 }
 
+// --- Seguridad HTML ---
 function escapeHtml(s) {
-  return s
+  return String(s)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
@@ -33,18 +40,16 @@ function escapeHtml(s) {
     .replaceAll("'", "&#39;");
 }
 
-// Convierte **texto** a <strong>texto</strong> (seguro)
+// Convierte **texto** a <strong>texto</strong> y listas tipo "* item"
 function renderMarkdownLite(text) {
   let html = escapeHtml(text);
 
   // **bold**
   html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
 
-  // bullets tipo "*   item"
-  // Convierte líneas que empiezan con "*" en <li>
   const lines = html.split("\n");
   let inList = false;
-  let out = [];
+  const out = [];
 
   for (const line of lines) {
     const m = line.match(/^\s*\*\s+(.*)$/);
@@ -59,87 +64,109 @@ function renderMarkdownLite(text) {
         out.push("</ul>");
         inList = false;
       }
-      // salto de línea normal
       out.push(line === "" ? "<br/>" : `<p>${line}</p>`);
     }
   }
   if (inList) out.push("</ul>");
 
-  // Limpia <p><br/></p> raros si querés (opcional)
   return out.join("");
 }
 
 function addBubble(role, text) {
+  if (!messagesEl) return;
+
   const div = document.createElement("div");
   div.className = `bubble ${role}`;
-
-  // Render bonito: bold + listas
   div.innerHTML = `<div class="msg">${renderMarkdownLite(text)}</div>`;
 
   messagesEl.appendChild(div);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-
 function loadHistory() {
   const raw = localStorage.getItem("chat_history");
   if (!raw) return;
+
   try {
     const history = JSON.parse(raw);
-    history.forEach((m) => addBubble(m.role, m.text));
-  } catch {}
+    if (Array.isArray(history)) {
+      history.forEach((m) => addBubble(m.role, m.text));
+    }
+  } catch {
+    // si el JSON está corrupto, lo ignoramos
+  }
 }
 
 function saveMessage(role, text) {
   const raw = localStorage.getItem("chat_history");
-  const history = raw ? JSON.parse(raw) : [];
+  let history = [];
+  try {
+    history = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(history)) history = [];
+  } catch {
+    history = [];
+  }
+
   history.push({ role, text });
   localStorage.setItem("chat_history", JSON.stringify(history.slice(-80)));
 }
 
-btnClear.addEventListener("click", () => {
-  localStorage.removeItem("chat_history");
-  messagesEl.innerHTML = "";
-  addBubble("ai", "Listo. Borré la conversación.");
-});
+// --- Botón Clear (opcional) ---
+const btnClear = $("btnClear");
+if (btnClear) {
+  btnClear.addEventListener("click", () => {
+    localStorage.removeItem("chat_history");
+    if (messagesEl) messagesEl.innerHTML = "";
+    addBubble("ai", "Conversation deleted.");
+  });
+}
 
-formEl.addEventListener("submit", async (e) => {
-  e.preventDefault();
+// --- Submit ---
+if (formEl) {
+  formEl.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const msg = inputEl.value.trim();
-  if (!msg) return;
+    const msg = (inputEl?.value ?? "").trim();
+    if (!msg) return;
 
-  inputEl.value = "";
-  addBubble("user", msg);
-  saveMessage("user", msg);
+    if (inputEl) inputEl.value = "";
 
-  setStatus("loading", "Pensando...");
+    addBubble("user", msg);
+    saveMessage("user", msg);
 
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: msg }),
-    });
+    setStatus("loading", "Thinking...");
 
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(`HTTP ${res.status}: ${txt}`);
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg }),
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`HTTP ${res.status}: ${txt}`);
+      }
+
+      const data = await res.json();
+      const reply = data.reply ?? "(no reply)";
+
+      addBubble("ai", reply);
+      saveMessage("ai", reply);
+
+      setStatus("ready", "Ready");
+    } catch (err) {
+      addBubble(
+        "ai",
+        "Error connecting to the backend. Make sure it is running at http://localhost:8000"
+      );
+      setStatus("error", "Error");
+      console.error(err);
     }
+  });
+}
 
-    const data = await res.json();
-    const reply = data.reply ?? "(sin reply)";
-    addBubble("ai", reply);
-    saveMessage("ai", reply);
-
-    setStatus("ready", "Listo");
-  } catch (err) {
-    addBubble("ai", "Error conectando con el backend. Revisá que esté corriendo en http://localhost:8000");
-    setStatus("error", "Error");
-    console.error(err);
-  }
-});
-
+// --- Init ---
 loadHistory();
-addBubble("ai", "Hola. Mandame un mensaje y lo mando al backend.");
-setStatus("ready", "Listo");
+addBubble("ai", "Hello. Send me a message and I'll forward it to the backend.");
+setStatus("ready", "Ready");
