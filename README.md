@@ -56,13 +56,16 @@ The API will only use the information present in this image.
 ----------------------------------------------------------------------------------------
 
 
-### Project structure
+## Project Structure
+
+
 testgemini/
 ├── main.py        # FastAPI application
 ├── first.py       # Gemini logic (recieve_prompt)
 ├── Menu.jpeg      # Menu image
-├── .env
-├── README.md
+├── .env           # Environment variables (not committed)
+└── README.md
+
 
 
 ----------------------------------------------------------------------------------------
@@ -105,6 +108,7 @@ the API will explicitly state that it cannot answer.
 The model is constrained to use only menu content.
 If prices or dishes are not visible in the image, no assumptions are made.
 Designed for experimentation and educational purposes.
+
 
 
 
