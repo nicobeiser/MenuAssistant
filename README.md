@@ -1,4 +1,4 @@
-# MenuAssistant (testgemini)
+# MenuAssistant
 
 A simple API that analyzes a restaurant menu image (JPG/JPEG) using Google Gemini and returns **3 menu-based recommendations** with:
 - dish name
@@ -192,6 +192,7 @@ This ensures that **all recommendations are image-driven**.
 The model is constrained to use only menu content.
 If prices or dishes are not visible in the image, no assumptions are made.
 Designed for experimentation and educational purposes.
+
 
 
 
