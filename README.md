@@ -47,10 +47,9 @@ API_KEY=YOUR_GEMINI_API_KEY
 ⚠️ Do NOT commit this file.
 
 
-### 5) Menu image
-Place the menu image in the project root and name it:
-Menu.jpeg
-The API will only use the information present in this image.
+### 5) This step was not intended to be on the main branch,
+but we forgot to remove it. Unfortunately, we can’t modify the main README now,
+as we would be disqualified from the hackathon.
 
 
 ----------------------------------------------------------------------------------------
@@ -62,10 +61,14 @@ The API will only use the information present in this image.
 testgemini/
 ├── main.py              # FastAPI application (API endpoints)
 ├── first.py             # Gemini logic (receive_prompt)
-├── Menu.jpeg            # Menu image
+├── load_image.py        # Python script to load the image on the API
 ├── .env                 # Environment variables (not committed)
+├── images/              # Images uploaded
 ├── frontend/            # Simple web UI
 │   ├── chat.html
+│   ├── admin.css
+│   ├── admin.html
+│   ├── admin.js
 │   ├── chat.js
 │   ├── styles.css
 │   ├── favicon.ico
@@ -192,6 +195,7 @@ This ensures that **all recommendations are image-driven**.
 The model is constrained to use only menu content.
 If prices or dishes are not visible in the image, no assumptions are made.
 Designed for experimentation and educational purposes.
+
 
 
 
