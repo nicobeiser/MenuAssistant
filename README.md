@@ -102,26 +102,94 @@ Swagger UI: http://127.0.0.1:8000/docs
 
 ```bash
 POST /chat
-Send a question related to the menu.
+Send a question related to the uploaded menu images.
+
 Request body:
 {
-  "message": "What are 3 recommended dishes?"
+  "message": "I want something vegetarian"
 }
+
 Example using curl:
 curl -X POST http://127.0.0.1:8000/chat \
   -H "Content-Type: application/json" \
-  -d '{"message":"What are 3 recommended dishes?"}'
+  -d '{"message":"I want something vegetarian"}'
 ```
-
 
 Response:
 {
   "reply": "1) Dish - price - reason\n2) ...\n3) ..."
 }
 
+---
 
-If the question cannot be answered using only the menu image,
-the API will explicitly state that it cannot answer.
+```bash
+POST /upload
+Upload one or more menu images (multipart/form-data).
+Field name: files
+
+Example using curl:
+curl -X POST http://127.0.0.1:8000/upload \
+  -F "files=@menu1.jpg" \
+  -F "files=@menu2.png"
+```
+
+Response:
+{
+  "uploaded": ["menu1.jpg", "menu2.png"]
+}
+
+---
+
+```bash
+GET /images
+List all uploaded menu images.
+
+Example using curl:
+curl http://127.0.0.1:8000/images
+```
+
+Response:
+{
+  "images": ["menu1.jpg", "menu2.png"]
+}
+
+---
+
+```bash
+GET /images/{filename}/file
+Return the actual image binary for preview.
+```
+
+---
+
+```bash
+DELETE /images/{filename}
+Delete a specific uploaded image.
+
+Example using curl:
+curl -X DELETE http://127.0.0.1:8000/images/menu1.jpg
+```
+
+Response:
+{
+  "deleted": "menu1.jpg"
+}
+
+---
+
+```bash
+DELETE /images
+Delete all uploaded menu images.
+
+Example using curl:
+curl -X DELETE http://127.0.0.1:8000/images
+```
+
+Response:
+{
+  "status": "all images deleted"
+}
+
 
 
 
@@ -195,6 +263,7 @@ This ensures that **all recommendations are image-driven**.
 The model is constrained to use only menu content.
 If prices or dishes are not visible in the image, no assumptions are made.
 Designed for experimentation and educational purposes.
+
 
 
 
