@@ -6,6 +6,8 @@ const API_URL = `${BASE_URL}/chat`;
 
 const $ = (id) => document.getElementById(id);
 
+
+const languageEl = $("language");
 const messagesEl = $("messages");
 const formEl = $("form");
 const inputEl = $("input");
@@ -138,12 +140,14 @@ if (formEl) {
     setStatus("loading", "Thinking...");
 
     try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg }),
-      });
-
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: msg,
+            language: languageEl?.value ?? "es",
+          }),
+        });
       if (!res.ok) {
         const txt = await res.text();
         throw new Error(`HTTP ${res.status}: ${txt}`);
