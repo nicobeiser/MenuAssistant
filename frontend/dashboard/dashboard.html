@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>MenuAssistant Metrics</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="container">
+    <h1>📊 MenuAssistant Analytics</h1>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <h3>Total Chats</h3>
+        <p id="totalChats">-</p>
+      </div>
+
+      <div class="kpi-card">
+        <h3>Avg Latency (ms)</h3>
+        <p id="avgLatency">-</p>
+      </div>
+
+      <div class="kpi-card">
+        <h3>Total Errors</h3>
+        <p id="totalErrors">-</p>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <canvas id="dailyChart"></canvas>
+    </div>
+
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

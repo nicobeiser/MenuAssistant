@@ -4,17 +4,36 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from fastapi.responses import FileResponse
 from pathlib import Path
+from metrics.router import router as metrics_router
 import shutil
-
+from metrics.db import engine, Base
+from metrics.middleware import MetricsMiddleware
 from first import recieve_prompt
 from load_image import IMAGES_DIR, ALLOWED_EXTENSIONS
+from metrics.service import track_event
+import time
+import asyncio
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+from metrics.db import engine, Base
 
 BASE_DIR = Path(__file__).resolve().parent
 
 # Ensure images directory exists
 IMAGES_DIR.mkdir(exist_ok=True)
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    yield
+
+    # Shutdown (si después querés cerrar conexiones, etc.)
+    await engine.dispose()
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,14 +42,35 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_middleware(MetricsMiddleware)
+
 
 class ChatIn(BaseModel):
     message: str
 
 @app.post("/chat")
-def chat(payload: ChatIn):
-    reply = recieve_prompt(payload.message)
-    return {"reply": reply}
+async def chat(payload: ChatIn):
+    t0 = time.perf_counter()
+    result = recieve_prompt(payload.message)
+    dt = (time.perf_counter() - t0) * 1000
+
+    if isinstance(result, dict) and "text" in result and "metrics" in result:
+        m = result["metrics"] or {}
+        duration = m.get("model_latency_ms", dt)
+
+        meta = (
+            f"ok={m.get('ok')};"
+            f"images={m.get('images_count')};"
+            f"prompt_chars={m.get('prompt_chars')};"
+            f"error={m.get('error')};"
+            f"usage={m.get('usage')}"
+        )
+
+        await track_event(type="chat", duration_ms=duration, meta=meta)
+        return {"reply": result["text"]}
+
+    await track_event(type="chat", duration_ms=dt, meta="ok=unknown;fallback=true")
+    return {"reply": str(result)}
 
 
 @app.post("/upload")
@@ -48,6 +88,8 @@ async def upload_images(files: list[UploadFile] = File(...)):
         with open(dest, "wb") as buf:
             shutil.copyfileobj(f.file, buf)
         saved.append(f.filename)
+
+    await track_event(type="upload", meta=f"count={len(saved)}")
     return {"uploaded": saved}
 
 
@@ -90,3 +132,13 @@ def delete_all_images():
             if f.suffix.lower() in ALLOWED_EXTENSIONS:
                 f.unlink()
     return {"status": "all images deleted"}
+
+
+
+
+
+
+
+
+
+app.include_router(metrics_router)
