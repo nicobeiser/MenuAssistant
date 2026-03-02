@@ -8,14 +8,16 @@ class Event(Base):
     id = Column(Integer, primary_key=True)
     ts = Column(DateTime, default=datetime.utcnow, index=True)
 
-    # tipo de evento: "chat", "upload", "delete_image"
+    # tipo de evento: "chat", "upload", "http_request", etc.
     type = Column(String, index=True)
 
-    # endpoint
+    # endpoint (opcional)
     endpoint = Column(String, nullable=True)
 
-    # duración (ms)
     duration_ms = Column(Float, nullable=True)
 
-    # metadata simple (ej: filename, count uploads)
+    total_ms = Column(Float, nullable=True)
+    model_ms = Column(Float, nullable=True)
+
+    # metadata simple
     meta = Column(String, nullable=True)

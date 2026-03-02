@@ -16,6 +16,8 @@ import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from metrics.db import engine, Base
+from metrics.timer import span
+from fastapi.concurrency import run_in_threadpool
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -35,6 +37,17 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+
+DASH_DIR = BASE_DIR / "frontend" / "dashboard"
+
+# Sirve los archivos estáticos (js/css/etc)
+app.mount("/dashboard/static", StaticFiles(directory=str(DASH_DIR)), name="dashboard-static")
+
+# Sirve el HTML principal
+@app.get("/dashboard")
+def dashboard():
+    return FileResponse(DASH_DIR / "dashboard.html")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -48,28 +61,39 @@ app.add_middleware(MetricsMiddleware)
 class ChatIn(BaseModel):
     message: str
 
+
 @app.post("/chat")
 async def chat(payload: ChatIn):
-    t0 = time.perf_counter()
-    result = recieve_prompt(payload.message)
-    dt = (time.perf_counter() - t0) * 1000
+
+    with span() as total:
+        result = await run_in_threadpool(recieve_prompt, payload.message)
+
+    total_ms = total["ms"]
 
     if isinstance(result, dict) and "text" in result and "metrics" in result:
         m = result["metrics"] or {}
-        duration = m.get("model_latency_ms", dt)
+        model_ms = m.get("model_latency_ms")
 
-        meta = (
-            f"ok={m.get('ok')};"
-            f"images={m.get('images_count')};"
-            f"prompt_chars={m.get('prompt_chars')};"
-            f"error={m.get('error')};"
-            f"usage={m.get('usage')}"
+        await track_event(
+            type="chat",
+            total_ms=float(total_ms),
+            model_ms=float(model_ms) if model_ms else None,
+            meta=(
+                f"ok={m.get('ok')};"
+                f"images={m.get('images_count')};"
+                f"prompt_chars={m.get('prompt_chars')}"
+            )
         )
 
-        await track_event(type="chat", duration_ms=duration, meta=meta)
         return {"reply": result["text"]}
 
-    await track_event(type="chat", duration_ms=dt, meta="ok=unknown;fallback=true")
+    await track_event(
+        type="chat",
+        total_ms=float(total_ms),
+        model_ms=None,
+        meta="fallback=true"
+    )
+
     return {"reply": str(result)}
 
 

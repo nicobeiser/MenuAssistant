@@ -38,7 +38,7 @@ source .venv/bin/activate   # macOS / Linux
 ### 3) Install dependencies
 ```bash
 pip install -U pip
-pip install fastapi uvicorn python-dotenv google-genai requests
+pip install fastapi uvicorn python-dotenv google-genai requests sqlalchemy aiosqlite python-multipart
 ```
 
 ### 4) Environment variables
