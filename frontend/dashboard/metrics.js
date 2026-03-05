@@ -264,7 +264,7 @@ function startDashboardPolling() {
   if (window.__metricsInterval) return;
 
   refreshAll();
-  window.__metricsInterval = setInterval(refreshAll, 15000);
+  window.__metricsInterval = setInterval(refreshAll, 90000);
 }
 
 // Arranque único

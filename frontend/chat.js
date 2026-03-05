@@ -1,5 +1,4 @@
-const BASE_URL = "http://127.0.0.1:8000";
-const API_URL = `${BASE_URL}/chat`;
+const API_URL = "/api/chat";
 
 
 
@@ -145,7 +144,6 @@ if (formEl) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             message: msg,
-            language: languageEl?.value ?? "es",
           }),
         });
       if (!res.ok) {
