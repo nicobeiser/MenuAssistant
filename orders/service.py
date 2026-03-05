@@ -1,6 +1,6 @@
-from model import Order
+from .model import Order
 from .schemas import OrderCreateIn, OrderOut
-from ..metrics.db import get_db
+from metrics.db import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, JSON
 from datetime import datetime, timezone
 
-from db.database import Base
+from metrics.db import Base
 
 class Order(Base):
     __tablename__ = "orders"
