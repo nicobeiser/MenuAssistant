@@ -1,7 +1,7 @@
 from metrics.timer import span
 from fastapi.concurrency import run_in_threadpool
 from metrics.service import track_event
-from first import recieve_prompt 
+from first import recieve_chat_prompt
 
 async def handle_chat(message: str) -> dict:
     with span() as total:

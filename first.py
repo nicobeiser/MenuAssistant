@@ -14,7 +14,7 @@ API_KEY = os.getenv("API_KEY")
 client = genai.Client(api_key=API_KEY)
 
 
-def recieve_prompt(prompt):
+def recieve_chat_prompt(prompt):
     system_prompt = (
         "Analyze the menu and answer the following question."
         " Do not use any information that is not present in the menu."
@@ -89,6 +89,66 @@ def recieve_prompt(prompt):
             "usage": str(usage) if usage is not None else None,
         },
     }
+
+
+
+
+def receive_image_prompt(prompt, image_bytes):
+    t0 = time.perf_counter()
+
+    image_part = types.Part.from_bytes(
+        data=image_bytes,
+        mime_type="image/jpeg",
+    )
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-3-flash-preview",
+            contents=[
+                prompt,
+                image_part
+            ],
+        )
+        latency_ms = (time.perf_counter() - t0) * 1000
+    except Exception as e:
+        print(e)
+        latency_ms = (time.perf_counter() - t0) * 1000
+        return {
+            "text": "Model error. Try again.",
+            "metrics": {
+                "model_latency_ms": latency_ms,
+       #         "images_count": len(images), I guess we can leave this as null
+                "prompt_chars": len(prompt),
+                "ok": False,
+                "error": type(e).__name__,
+            },
+        }
+        
+
+    texts = []
+    for part in response.candidates[0].content.parts:
+        if part.text is not None:
+            texts.append(part.text)
+
+    final_text = "".join(texts)
+    print(final_text)
+
+
+    usage = getattr(response, "usage_metadata", None) or getattr(response, "usage", None)
+
+    return {
+        "text": final_text,
+        "metrics": {
+            "model_latency_ms": latency_ms,
+        #    "images_count": len(images), same as up here
+            "prompt_chars": len(prompt),
+            "ok": True,
+            "usage": str(usage) if usage is not None else None,
+        },
+    }
+    
+
+
 
 
 if __name__ == "__main__":
