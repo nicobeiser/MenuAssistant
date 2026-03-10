@@ -12,7 +12,8 @@ from services.image_service import (
     delete_all_images_service,
     build_menu_extraction_prompt,
     call_parser,
-    save_dishes as save_dishes_service
+    save_dishes as save_dishes_service,
+    get_dishes as get_dishes_service
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -51,3 +52,8 @@ def parse_imgage(filename: str):
 @router.post("/dishes/save")
 async def save_dishes_endpoint(payload: DishBulkIn, db: AsyncSession = Depends(get_db)):
     return await save_dishes_service(payload, db)
+
+
+@router.get("/dishes")
+async def get_dishes(db: AsyncSession = Depends(get_db)):
+    return await get_dishes_service(db)

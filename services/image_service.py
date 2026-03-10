@@ -11,6 +11,7 @@ from models.dish import Dish
 from schemas.dish import DishBulkIn
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 
 async def upload_images_service(files):
@@ -213,3 +214,14 @@ async def save_dishes(payload: DishBulkIn, db: AsyncSession):
         "count": len(created),
         "ids": [new_dish.id for new_dish in created]
     }
+
+
+
+
+
+
+async def get_dishes(db: AsyncSession):
+    result = await db.execute(select(Dish))
+    dishes = result.scalars().all()
+
+    return dishes

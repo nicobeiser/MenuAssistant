@@ -10,3 +10,8 @@ TEST_DIR = BASE_DIR / "tests" / "testParser"
 @router.get("/test/parser")
 def serve_test_parser():
     return FileResponse(TEST_DIR / "testParser.html")
+
+
+@router.get("/test/dishes")
+def serve_test_dishes():
+    return FileResponse(TEST_DIR / "testGetDishes.html")

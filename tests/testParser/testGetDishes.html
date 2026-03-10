@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lista de Dishes</title>
+ <style>
+:root{
+  --rolex-green:#0f3d2e;
+  --rolex-green-light:#1f6f54;
+  --rolex-gold:#d4af37;
+  --bg:#f2f5f3;
+}
+
+body{
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  margin:0;
+  padding:40px;
+  color:#1a1a1a;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:40px;
+  font-size:2.2rem;
+  letter-spacing:1px;
+  color:var(--rolex-green);
+}
+
+#dishes-container{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:28px;
+  max-width:1200px;
+  margin:auto;
+}
+
+.dish-card{
+  background:white;
+  border-radius:14px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);
+  overflow:hidden;
+  padding:18px;
+  transition:all .25s ease;
+  border-top:4px solid var(--rolex-green);
+}
+
+.dish-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 14px 32px rgba(0,0,0,0.12);
+}
+
+.dish-image{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  border-radius:8px;
+  background:#ddd;
+  margin-bottom:12px;
+}
+
+.dish-title{
+  margin:10px 0 6px;
+  font-size:1.3rem;
+  font-weight:700;
+  color:var(--rolex-green);
+}
+
+.dish-description{
+  color:#555;
+  font-size:.95rem;
+  margin-bottom:10px;
+}
+
+.dish-price{
+  font-size:1.1rem;
+  font-weight:700;
+  color:var(--rolex-gold);
+  margin-bottom:8px;
+}
+
+.dish-category{
+  font-size:.85rem;
+  margin-bottom:6px;
+  color:#666;
+}
+
+.dish-available{
+  font-size:.9rem;
+  margin-bottom:6px;
+}
+
+.available{
+  color:#1f7a4c;
+  font-weight:600;
+}
+
+.not-available{
+  color:#c0392b;
+  font-weight:600;
+}
+
+.dish-tags{
+  font-size:.8rem;
+  color:#777;
+}
+
+.loading,
+.error,
+.empty{
+  text-align:center;
+  font-size:1.1rem;
+  margin-top:40px;
+  color:var(--rolex-green);
+}
+</style>
+</head>
+<body>
+  <h1>Lista de Dishes</h1>
+
+  <div id="status" class="loading">Cargando dishes...</div>
+  <div id="dishes-container"></div>
+
+  <script>
+    const API_URL = "http://127.0.0.1:8000/dishes"; 
+    // cambiá esto si tu endpoint real tiene otro path
+
+    const statusEl = document.getElementById("status");
+    const container = document.getElementById("dishes-container");
+
+    async function loadDishes() {
+      try {
+        const response = await fetch(API_URL);
+
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const dishes = await response.json();
+
+        statusEl.style.display = "none";
+
+        if (!dishes || dishes.length === 0) {
+          statusEl.textContent = "No hay dishes cargados.";
+          statusEl.className = "empty";
+          statusEl.style.display = "block";
+          return;
+        }
+
+        container.innerHTML = dishes.map(dish => `
+          <div class="dish-card">
+            <img 
+              class="dish-image" 
+              src="${dish.image_url || 'https://via.placeholder.com/400x180?text=Sin+imagen'}" 
+              alt="${dish.name}"
+            />
+
+            <div class="dish-title">${dish.name ?? "Sin nombre"}</div>
+
+            <div class="dish-description">
+              ${dish.description ?? "Sin descripción"}
+            </div>
+
+            <div class="dish-price">
+              $${dish.price ?? 0}
+            </div>
+
+            <div class="dish-category">
+              <strong>Categoría:</strong> ${dish.category ?? "Sin categoría"}
+            </div>
+
+            <div class="dish-available">
+              <strong>Disponible:</strong>
+              <span class="${dish.available ? 'available' : 'not-available'}">
+                ${dish.available ? 'Sí' : 'No'}
+              </span>
+            </div>
+
+            <div class="dish-tags">
+              <strong>Tags:</strong>
+              ${Array.isArray(dish.tags) ? dish.tags.join(", ") : (dish.tags ?? "Sin tags")}
+            </div>
+          </div>
+        `).join("");
+
+      } catch (error) {
+        console.error(error);
+        statusEl.textContent = "Error al cargar los dishes.";
+        statusEl.className = "error";
+      }
+    }
+
+    loadDishes();
+  </script>
+</body>
+</html>
