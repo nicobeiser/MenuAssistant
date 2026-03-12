@@ -1,3 +1,5 @@
+import mimetypes
+
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -93,13 +95,18 @@ def recieve_chat_prompt(prompt):
 
 
 
-def receive_image_prompt(prompt, image_bytes):
+def receive_image_prompt(prompt, image_bytes, filename):
     t0 = time.perf_counter()
+
+    mime_type, _ = mimetypes.guess_type(filename)
+    if mime_type is None:
+        mime_type = "image/jpeg"
 
     image_part = types.Part.from_bytes(
         data=image_bytes,
-        mime_type="image/jpeg",
+        mime_type=mime_type,
     )
+
 
     try:
         response = client.models.generate_content(

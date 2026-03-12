@@ -5,7 +5,7 @@ from first import recieve_chat_prompt
 
 async def handle_chat(message: str) -> dict:
     with span() as total:
-        result = await run_in_threadpool(recieve_prompt, message)
+        result = await run_in_threadpool(recieve_chat_prompt, message)
 
     total_ms = float(total["ms"])
 

@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse
 from first import receive_image_prompt
 from metrics.db import get_db
 from models.dish import Dish
-from schemas.dish import DishBulkIn
+from schemas.dish import DishBulkIn, DishUpdateIn
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -80,7 +80,7 @@ def delete_all_images_service():
 
 
 
-def build_menu_extraction_prompt(image_url: str) -> str:
+def build_menu_extraction_prompt(filename: str) -> str:
     return f"""
         You are an expert system for extracting structured restaurant menu data from images.
 
@@ -101,7 +101,7 @@ def build_menu_extraction_prompt(image_url: str) -> str:
             "description": "string",
             "price": 0,
             "category": "string",
-            "image_url": "{image_url}",
+            "image_url": "{filename}",
             "available": true,
             "tags": [],
             "extraction_confidence": 0.0,
@@ -136,7 +136,7 @@ def build_menu_extraction_prompt(image_url: str) -> str:
             "description": "Carne, queso, lechuga y tomate",
             "price": 12000,
             "category": "Hamburguesas",
-            "image_url": "{image_url}",
+            "image_url": "{filename}",
             "available": true,
             "tags": [],
             "extraction_confidence": 0.94,
@@ -147,7 +147,7 @@ def build_menu_extraction_prompt(image_url: str) -> str:
             "description": "",
             "price": 5000,
             "category": "Acompañamientos",
-            "image_url": "{image_url}",
+            "image_url": "{filename}",
             "available": true,
             "tags": [],
             "extraction_confidence": 0.89,
@@ -158,22 +158,11 @@ def build_menu_extraction_prompt(image_url: str) -> str:
         """
 
 
-def call_parser(filename: str):
-    image_path = IMAGES_DIR / filename
-
-   
-    if not image_path.exists():
-        print("error!!")
-        return {"error": f"Image not found: {filename}"}
-
-
-    with open(image_path, "rb") as f:
-        image_bytes = f.read()
-
+def call_parser_from_upload(filename: str, image_bytes: bytes):
     print("preparing the prompt...")
     prompt = build_menu_extraction_prompt(filename)
 
-    return receive_image_prompt(prompt,image_bytes)
+    return receive_image_prompt(prompt, image_bytes, filename)
 
 
 
@@ -225,3 +214,61 @@ async def get_dishes(db: AsyncSession):
     dishes = result.scalars().all()
 
     return dishes
+
+
+
+async def update_dish(dish_id: int, payload: DishUpdateIn, db: AsyncSession):
+    result = await db.execute(select(Dish).where(Dish.id == dish_id))
+    dish = result.scalar_one_or_none()
+
+    if not dish:
+        raise HTTPException(status_code=404, detail="Dish not found")
+
+    dish.name = payload.name
+    dish.description = payload.description
+    dish.price = payload.price
+    dish.category = payload.category
+    dish.image_url = payload.image_url
+    dish.available = payload.available
+    dish.tags = payload.tags
+    dish.extraction_confidence = payload.extraction_confidence
+    dish.extraction_source = payload.extraction_source
+
+    await db.commit()
+    await db.refresh(dish)
+
+    return dish
+
+
+
+async def create_dish(payload, db: AsyncSession):
+    new_dish = Dish(
+        name=payload.name,
+        description=payload.description,
+        price=payload.price,
+        category=payload.category,
+        image_url=payload.image_url,
+        available=payload.available,
+        tags=payload.tags,
+        extraction_confidence=payload.extraction_confidence,
+        extraction_source=payload.extraction_source,
+    )
+
+    db.add(new_dish)
+    await db.commit()
+    await db.refresh(new_dish)
+
+    return new_dish
+
+
+async def delete_dish(dish_id: int, db: AsyncSession):
+    result = await db.execute(select(Dish).where(Dish.id == dish_id))
+    dish = result.scalar_one_or_none()
+
+    if not dish:
+        raise HTTPException(status_code=404, detail="Dish not found")
+
+    await db.delete(dish)
+    await db.commit()
+
+    return {"message": "Dish deleted successfully", "id": dish_id}

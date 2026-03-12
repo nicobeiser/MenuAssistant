@@ -1,17 +1,17 @@
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from models.dish import Dish
 from schemas.dish import DishBulkIn
 from sqlalchemy.orm import Session
 from metrics.db import get_db
-from services.image_service import (
+from services.menu_service import (
     upload_images_service,
     list_images_service,
     get_image_file_service,
     delete_image_service,
     delete_all_images_service,
     build_menu_extraction_prompt,
-    call_parser,
+    call_parser_from_upload,
     save_dishes as save_dishes_service,
     get_dishes as get_dishes_service
 )
@@ -45,8 +45,17 @@ def delete_all_images():
 
 
 @router.post("/parse_image")
-def parse_imgage(filename: str):
-    return call_parser(filename)
+async def parse_image(file: UploadFile = File(...)):
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="El archivo debe ser una imagen")
+
+    image_bytes = await file.read()
+
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="La imagen está vacía")
+
+    result = call_parser_from_upload(file.filename, image_bytes)
+    return result
 
 
 @router.post("/dishes/save")
